@@ -54,8 +54,8 @@ function Categories({ omit }) {
   </a>)}</div>;
 }
 function RecipeGrid({ recent = false }) {
-  return <div className="recipe-grid">{content.recipes.slice(0,recent ? 6 : undefined).map((r,i) => <a className="recipe-card" href={recipePath(r)} key={r.slug}>
-    <img src={asset(r.image)} alt="" width="1240" height="680" loading={recent || i > 2 ? 'lazy' : 'eager'} /><h2>{r.title}</h2>
+  return <div className="recipe-grid">{content.recipes.slice(0,recent ? 6 : undefined).map((r,i) => <a className="recipe-card" href={recipePath(r)} key={r.slug} style={{'--recipe-color':r.color}}>
+    <div className="recipe-card-art"><img src={asset(r.image)} alt="" width="1240" height="680" loading={recent || i > 2 ? 'lazy' : 'eager'} /></div><h2>{r.title}</h2>
   </a>)}</div>;
 }
 const memoryDescriptions = [
@@ -70,11 +70,15 @@ const memoryDescriptions = [
 function Memories() {
   const rail = useRef(null);
   const [position, setPosition] = useState(0);
+  function memoryStep(el) {
+    const first = el.firstElementChild;
+    const second = first?.nextElementSibling;
+    return second ? second.offsetLeft - first.offsetLeft : el.clientWidth;
+  }
   function move(direction) {
     const el = rail.current;
     if (!el) return;
-    const card = el.firstElementChild;
-    const step = (card?.getBoundingClientRect().width || el.clientWidth) + 10;
+    const step = memoryStep(el);
     const current = Math.round(el.scrollLeft / step);
     const visible = Math.max(1, Math.round(el.clientWidth / step));
     const max = Math.max(0, content.memories.length - visible);
@@ -86,8 +90,8 @@ function Memories() {
   }
   return <section className="memories" aria-labelledby="memories-title" aria-roledescription="carousel">
     <h2 className="section-title" id="memories-title">2025 MEMORIES</h2>
-    <div className="memory-wrap"><div className="memory-rail" ref={rail} onScroll={e => { const el = e.currentTarget; const step = (el.firstElementChild?.getBoundingClientRect().width || el.clientWidth) + 10; setPosition(Math.round(el.scrollLeft / step)); }} tabIndex="0" aria-label="2025 photo memories. Scroll to browse." onKeyDown={e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault();move(e.key === 'ArrowRight' ? 1 : -1); } }}>
-      {content.memories.map((image,i) => <img key={image} src={asset(image)} alt={memoryDescriptions[i] || 'A memory from 2025'} loading="lazy" width="768" height="1024" />)}
+    <div className="memory-wrap"><div className="memory-rail" ref={rail} onScroll={e => { const el = e.currentTarget; setPosition(Math.round(el.scrollLeft / memoryStep(el))); }} tabIndex="0" aria-label="2025 photo memories. Scroll to browse." onKeyDown={e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault();move(e.key === 'ArrowRight' ? 1 : -1); } }}>
+      {content.memories.map((image,i) => <div className="memory-photo" key={image}><img src={asset(image)} alt={memoryDescriptions[i] || 'A memory from 2025'} loading="lazy" width="768" height="1024" /></div>)}
     </div><button className="memory-prev" onClick={() => move(-1)} aria-label="Previous memory"><img src={asset('6tTbkXggWgQCAJ4DO2QEdXXmgM.svg')} alt="" /></button><button className="memory-next" onClick={() => move(1)} aria-label="Next memory"><img src={asset('11KSGbIZoRSg4pjdnUoif6MKHI.svg')} alt="" /></button></div>
     <span className="sr-only" aria-live="polite">Showing memories starting at {position + 1} of {content.memories.length}</span>
   </section>;
@@ -108,8 +112,10 @@ function Recipe({ recipe:r }) {
   const previous = content.recipes[i - 1];
   const next = content.recipes[i + 1];
   return <article className="recipe-detail" style={{'--recipe-color':r.color}}>
-    <div className="recipe-hero"><img src={asset(r.image)} alt={`Illustration of ${r.title}`} width="1240" height="680" fetchPriority="high" /><div className="recipe-summary"><div><h1>{r.title}</h1><p>{r.description}</p></div></div></div>
-    <div className="recipe-actions"><a href="#ingredients">Ingredients</a><a href="#method">Jump to method</a><button onClick={() => window.print()}>Print recipe</button></div>
+    <header className="recipe-hero">
+      <div className="recipe-summary"><h1>{r.title}</h1><p>{r.description}</p></div>
+      <figure className="recipe-art"><img src={asset(r.image)} alt={`Illustration of ${r.title}`} width="1240" height="680" fetchPriority="high" /></figure>
+    </header>
     <div className="recipe-body"><section id="ingredients"><h2>Ingredients</h2><div dangerouslySetInnerHTML={{__html:r.contents[0]}} /></section><section id="method"><h2>Method</h2><div dangerouslySetInnerHTML={{__html:r.contents[1]}} /></section></div>
     <nav className="recipe-pagination" aria-label="More recipes"><div>{previous ? <a href={recipePath(previous)}>‹ {previous.title}</a> : <a href="/recipes">All recipes</a>}</div><div>{next ? <a href={recipePath(next)}>{next.title} ›</a> : <a href="/recipes">All recipes ›</a>}</div></nav>
   </article>;

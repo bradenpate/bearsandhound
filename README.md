@@ -43,7 +43,7 @@ Update recipe ingredient/method HTML together with their structured-data arrays 
 - Named home links and product links; meaningful photo descriptions and a skip link.
 - One page-level heading per route, followed by semantic section headings.
 - Recipe ingredients increased from 16px to 18px, with more line spacing.
-- Recipe jump links, print styles and previous/next navigation.
+- Print styles and previous/next recipe navigation.
 - A manual carousel with buttons, keyboard navigation, native horizontal scrolling and reduced-motion support. It does not move automatically while someone is reading.
 - Original images and fonts served locally. Images are resized and converted to WebP, with lazy loading below the initial viewport.
 - Unique page metadata and prerendered HTML for crawlers and browsers without JavaScript.
